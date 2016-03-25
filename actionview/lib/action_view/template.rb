@@ -279,13 +279,13 @@ module ActionView
       # regardless of the original source encoding.
       def compile(mod) #:nodoc:
         encode!
-        method_name = self.method_name
+        _method_name = method_name
         code = @handler.call(self)
 
         # Make sure that the resulting String to be eval'd is in the
         # encoding of the code
         source = <<-end_src
-          def #{method_name}(local_assigns, output_buffer)
+          def #{_method_name}(local_assigns, output_buffer)
             _old_virtual_path, @virtual_path = @virtual_path, #{@virtual_path.inspect};_old_output_buffer = @output_buffer;#{locals_code};#{code}
           ensure
             @virtual_path, @output_buffer = _old_virtual_path, _old_output_buffer
@@ -307,7 +307,7 @@ module ActionView
         end
 
         mod.module_eval(source, identifier, 0)
-        ObjectSpace.define_finalizer(self, Finalizer[method_name, mod])
+        ObjectSpace.define_finalizer(self, Finalizer[_method_name, mod])
       end
 
       def handle_render_error(view, e) #:nodoc:
